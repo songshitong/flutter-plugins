@@ -5,7 +5,9 @@
 package io.flutter.plugins.webviewflutter;
 
 import android.annotation.TargetApi;
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.hardware.display.DisplayManager;
 import android.os.Build;
 import android.os.Handler;
@@ -28,15 +30,16 @@ public class FlutterWebView implements PlatformView, MethodCallHandler {
   private final MethodChannel methodChannel;
   private final FlutterWebViewClient flutterWebViewClient;
   private final Handler platformThreadHandler;
-
+  FlutterWebChromeClient flutterWebChromeClient;
   @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
   @SuppressWarnings("unchecked")
   FlutterWebView(
+          final Activity activity,
       final Context context,
-      BinaryMessenger messenger,
-      int id,
-      Map<String, Object> params,
-      final View containerView) {
+          BinaryMessenger messenger,
+          int id,
+          Map<String, Object> params,
+          final View containerView) {
 
     DisplayListenerProxy displayListenerProxy = new DisplayListenerProxy();
     DisplayManager displayManager =
@@ -48,6 +51,8 @@ public class FlutterWebView implements PlatformView, MethodCallHandler {
     platformThreadHandler = new Handler(context.getMainLooper());
     // Allow local storage.
     webView.getSettings().setDomStorageEnabled(true);
+    flutterWebChromeClient = new FlutterWebChromeClient(activity,context);
+    webView.setWebChromeClient(flutterWebChromeClient.createWebChromeClient());
 
     methodChannel = new MethodChannel(messenger, "plugins.flutter.io/webview_" + id);
     methodChannel.setMethodCallHandler(this);
@@ -297,5 +302,10 @@ public class FlutterWebView implements PlatformView, MethodCallHandler {
     methodChannel.setMethodCallHandler(null);
     webView.dispose();
     webView.destroy();
+  }
+
+  public boolean handleResult(int requestCode, int resultCode, Intent data) {
+
+    return flutterWebChromeClient.handleResult(requestCode,resultCode,data);
   }
 }
