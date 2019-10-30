@@ -29,7 +29,7 @@ import android.webkit.WebView;
 import androidx.core.content.FileProvider;
 
 public class FlutterWebChromeClient {
-    private static final String TAG = "FlutterWebChromeClient console";
+    private static final String TAG = "android console";
     private final static int FILECHOOSER_RESULTCODE = 1;
     Activity activity;
     Context context;

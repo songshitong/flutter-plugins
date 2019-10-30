@@ -45,21 +45,23 @@ public class FlutterWebView implements PlatformView, MethodCallHandler {
     DisplayManager displayManager =
         (DisplayManager) context.getSystemService(Context.DISPLAY_SERVICE);
     displayListenerProxy.onPreWebViewInitialization(displayManager);
-    webView = new InputAwareWebView(context, containerView);
+    //创建webview的context 必须是activity，不然报错Unable to create JsDialog without an Activity
+    //https://chromium.googlesource.com/chromium/src.git/+/lkgr/android_webview/glue/java/src/com/android/webview/chromium/WebViewContentsClientAdapter.java
+    webView = new InputAwareWebView(activity, containerView);
     displayListenerProxy.onPostWebViewInitialization(displayManager);
 
     platformThreadHandler = new Handler(context.getMainLooper());
     // Allow local storage.
     webView.getSettings().setDomStorageEnabled(true);
-    flutterWebChromeClient = new FlutterWebChromeClient(activity,context);
-    webView.setWebChromeClient(flutterWebChromeClient.createWebChromeClient());
+
 
     methodChannel = new MethodChannel(messenger, "plugins.flutter.io/webview_" + id);
     methodChannel.setMethodCallHandler(this);
 
     flutterWebViewClient = new FlutterWebViewClient(methodChannel);
     applySettings((Map<String, Object>) params.get("settings"));
-
+    flutterWebChromeClient = new FlutterWebChromeClient(activity,context);
+    webView.setWebChromeClient(flutterWebChromeClient.createWebChromeClient());
     if (params.containsKey(JS_CHANNEL_NAMES_FIELD)) {
       registerJavaScriptChannelNames((List<String>) params.get(JS_CHANNEL_NAMES_FIELD));
     }
