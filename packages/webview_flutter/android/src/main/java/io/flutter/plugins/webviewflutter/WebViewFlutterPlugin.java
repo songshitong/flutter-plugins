@@ -4,6 +4,7 @@
 
 package io.flutter.plugins.webviewflutter;
 
+import android.app.Activity;
 import io.flutter.plugin.common.PluginRegistry.Registrar;
 
 /** WebViewFlutterPlugin */
@@ -13,8 +14,8 @@ public class WebViewFlutterPlugin {
     registrar
         .platformViewRegistry()
         .registerViewFactory(
-            "plugins.flutter.io/webview",
-            new WebViewFactory(registrar.messenger(), registrar.view()));
+            "plugins.flutter.io/webview",new WebViewFactory(registrar.messenger(), registrar.view(),registrar)
+            );
     FlutterCookieManager.registerWith(registrar.messenger());
   }
 }
