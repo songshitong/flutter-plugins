@@ -9,9 +9,11 @@ import android.os.Build;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.webkit.WebResourceRequest;
+import android.webkit.WebResourceResponse;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.webkit.WebViewClientCompat;
 import io.flutter.plugin.common.MethodChannel;
 import java.util.HashMap;
@@ -101,6 +103,11 @@ class FlutterWebViewClient {
 
   private WebViewClient internalCreateWebViewClient() {
     return new WebViewClient() {
+      @Nullable
+      @Override
+      public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
+        return super.shouldInterceptRequest(view, request);
+      }
       @TargetApi(Build.VERSION_CODES.N)
       @Override
       public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
@@ -123,6 +130,13 @@ class FlutterWebViewClient {
 
   private WebViewClientCompat internalCreateWebViewClientCompat() {
     return new WebViewClientCompat() {
+      @Nullable
+      @Override
+      public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
+
+        return super.shouldInterceptRequest(view, request);
+      }
+
       @Override
       public boolean shouldOverrideUrlLoading(
           @NonNull WebView view, @NonNull WebResourceRequest request) {
