@@ -57,6 +57,7 @@ public class FlutterWebView implements PlatformView, MethodCallHandler {
     webView.getSettings().setAllowFileAccess(true);
     webView.getSettings().setAllowFileAccessFromFileURLs(true);
     webView.getSettings().setAllowUniversalAccessFromFileURLs(true);
+    webView.getSettings().setAllowContentAccess(true);
 
     methodChannel = new MethodChannel(messenger, "plugins.flutter.io/webview_" + id);
     methodChannel.setMethodCallHandler(this);

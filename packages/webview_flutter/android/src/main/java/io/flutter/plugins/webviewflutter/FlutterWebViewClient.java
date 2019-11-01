@@ -5,6 +5,7 @@
 package io.flutter.plugins.webviewflutter;
 
 import android.annotation.TargetApi;
+import android.net.Uri;
 import android.os.Build;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -14,8 +15,14 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.webkit.WebViewClientCompat;
 import io.flutter.plugin.common.MethodChannel;
+
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -51,6 +58,52 @@ class FlutterWebViewClient {
     //
     // For more details see: https://github.com/flutter/flutter/issues/25329#issuecomment-464863209
     return request.isForMainFrame();
+  }
+
+  private  WebResourceResponse shouldInterceptRequest (WebView view, String url){
+    WebResourceResponse response=null;
+    if(null != url){
+      Log.d(TAG,"shouldInterceptRequest url "+url);
+    }
+    if(url != null && url.startsWith("file")) {
+      Log.d(TAG,"shouldInterceptRequest url file "+url);
+      try {
+        FileInputStream is = new FileInputStream(url);
+        response = new WebResourceResponse(
+                "application/javascript",
+                "UTF8",
+                is
+        );
+      } catch (IOException e) {
+        e.printStackTrace(); // Failed to load asset file
+      }
+    }
+    return response;
+  }
+
+  @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+  private  WebResourceResponse shouldInterceptRequest (WebView view, WebResourceRequest request){
+    WebResourceResponse response=null;
+    String url = request.getUrl().getPath();
+    if(null != url){
+      Log.d(TAG,"shouldInterceptRequest request "+url);
+    }
+
+    if(url != null && url.startsWith("file")) {
+      Log.d(TAG,"shouldInterceptRequest request file "+url);
+
+      try {
+        FileInputStream is = new FileInputStream(url);
+        response = new WebResourceResponse(
+                "application/javascript",
+                "UTF8",
+                is
+        );
+      } catch (IOException e) {
+        e.printStackTrace(); // Failed to load asset file
+      }
+    }
+    return response;
   }
 
   private boolean shouldOverrideUrlLoading(WebView view, String url) {
@@ -103,11 +156,21 @@ class FlutterWebViewClient {
 
   private WebViewClient internalCreateWebViewClient() {
     return new WebViewClient() {
+      @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
       @Nullable
       @Override
       public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
-        return super.shouldInterceptRequest(view, request);
+        WebResourceResponse response=FlutterWebViewClient.this.shouldInterceptRequest(view,request);
+        return null==response?super.shouldInterceptRequest(view,request):response ;
       }
+
+      @Nullable
+      @Override
+      public WebResourceResponse shouldInterceptRequest(WebView view, String url) {
+        WebResourceResponse response=FlutterWebViewClient.this.shouldInterceptRequest(view,url);
+        return null==response?super.shouldInterceptRequest(view,url):response ;
+      }
+
       @TargetApi(Build.VERSION_CODES.N)
       @Override
       public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
@@ -130,11 +193,19 @@ class FlutterWebViewClient {
 
   private WebViewClientCompat internalCreateWebViewClientCompat() {
     return new WebViewClientCompat() {
+      @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
       @Nullable
       @Override
       public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
+        WebResourceResponse response=FlutterWebViewClient.this.shouldInterceptRequest(view,request);
+        return null==response?super.shouldInterceptRequest(view,request):response ;
+      }
 
-        return super.shouldInterceptRequest(view, request);
+      @Nullable
+      @Override
+      public WebResourceResponse shouldInterceptRequest(WebView view, String url) {
+         WebResourceResponse response=FlutterWebViewClient.this.shouldInterceptRequest(view,url);
+         return null==response?super.shouldInterceptRequest(view,url):response ;
       }
 
       @Override
