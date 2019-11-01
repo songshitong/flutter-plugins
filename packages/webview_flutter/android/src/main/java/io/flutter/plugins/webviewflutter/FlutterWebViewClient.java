@@ -19,6 +19,7 @@ import androidx.annotation.RequiresApi;
 import androidx.webkit.WebViewClientCompat;
 import io.flutter.plugin.common.MethodChannel;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -65,10 +66,10 @@ class FlutterWebViewClient {
     if(null != url){
       Log.d(TAG,"shouldInterceptRequest url "+url);
     }
-    if(url != null && url.startsWith("file")) {
-      Log.d(TAG,"shouldInterceptRequest url file "+url);
+    if(url != null && url.startsWith("local")) {
+//      file:/data/user/0/com.example.flutterdemo/app_flutter/localHtml.html
       try {
-        FileInputStream is = new FileInputStream(url);
+        FileInputStream is = new FileInputStream(url.substring(6,url.length()));
         response = new WebResourceResponse(
                 "application/javascript",
                 "UTF8",
@@ -89,11 +90,9 @@ class FlutterWebViewClient {
       Log.d(TAG,"shouldInterceptRequest request "+url);
     }
 
-    if(url != null && url.startsWith("file")) {
-      Log.d(TAG,"shouldInterceptRequest request file "+url);
-
+    if(url != null && url.startsWith("local")) {
       try {
-        FileInputStream is = new FileInputStream(url);
+        FileInputStream is = new FileInputStream(url.substring(6,url.length()));
         response = new WebResourceResponse(
                 "application/javascript",
                 "UTF8",
